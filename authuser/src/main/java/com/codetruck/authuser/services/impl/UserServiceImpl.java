@@ -15,7 +15,7 @@ import com.codetruck.authuser.services.UserService;
 @Service
 public class UserServiceImpl implements UserService {
 
-	UserRepository userRepository;
+	final UserRepository userRepository;
 	
 	public UserServiceImpl(UserRepository userRepository) {
 		this.userRepository = userRepository;
@@ -29,6 +29,26 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public Optional<UserModel> findById(UUID userId) {
 		return this.userRepository.findById(userId);
+	}
+
+	@Override
+	public boolean existsByUsername(String username) {
+		return this.userRepository.existsByUsername(username);
+	}
+
+	@Override
+	public boolean existsByEmail(String email) {
+		return this.userRepository.existsByEmail(email);
+	}
+
+	@Override
+	public void save(UserModel userModel) {
+		this.userRepository.save(userModel);
+	}
+
+	@Override
+	public void delete(UserModel userModel) {
+		this.userRepository.delete(userModel);
 	}
 
 }

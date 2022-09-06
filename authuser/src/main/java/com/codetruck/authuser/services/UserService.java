@@ -15,5 +15,12 @@ public interface UserService {
 
 	Optional<UserModel> findById(UUID userId);
 
+	public boolean existsByUsername(String username);
+
+	public boolean existsByEmail(String email);
+
+	public void save(UserModel userModel);
+
+	public void delete(UserModel userModel);
 	
 }
