@@ -21,6 +21,7 @@ public class InitialRolesConfig implements ApplicationRunner {
 	
 	@Override
 	public void run(ApplicationArguments args) throws Exception {
+		
 		if (this.roleService.count() != 0) {
 			return;
 		}

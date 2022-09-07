@@ -1,0 +1,28 @@
+server:
+  port: 8086
+  
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/gpsms-typification
+    username: postgres
+    password: admin123
+  jpa:
+    hibernate:
+      ddl-auto: update
+      dialect: org.hibernate.dialect.PostgreSQLDialect
+      jdbc:
+        lob.non-contextual-creation: true
+    properties:
+      hibernate:
+        show_sql: true
+    open-in-view: false
+  output:
+    ansi:
+      enabled: always
+
+logging:
+  level:
+    root: info
+    '[org.springframework.web]': debug
+    '[org.hibernate]': info
+    '[com.codetruck]': trace
