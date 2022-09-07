@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.codetruck.authuser.dtos.UserDto;
 import com.codetruck.authuser.dtos.UserDto.UserView;
+import com.codetruck.authuser.dtos.UserRolesDto;
 import com.codetruck.authuser.models.UserModel;
 import com.codetruck.authuser.services.UserService;
 import com.codetruck.authuser.specifications.SpecificationTemplate;
@@ -191,6 +192,57 @@ public class UserController {
 		log.debug("User`s image updated successfully {}", userModel.toString());
 		
 		return ResponseEntity.status(HttpStatus.OK).body(userModelOptional.get());
+	}
+
+	@GetMapping("/{userId}/roles")
+	public ResponseEntity<Object> getUserRoles(
+			@PathVariable(value = "userId") UUID userId) {
+		
+		log.debug("GET getUserRoles userId {}", userId);
+		
+		Optional<UserModel> userModelOptional = this.userService.findById(userId);
+		
+		if (!userModelOptional.isPresent()) {
+			log.warn("User not found {}", userId);
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+		}
+			
+		final UserModel userModelFound = userModelOptional.get();
+		
+		userModelFound.add(linkTo(methodOn(UserController.class).getOneUser(userModelFound.getUserId())).withSelfRel());
+		
+		log.debug("User roles {}", userModelFound.toString());
+		
+		return ResponseEntity.status(HttpStatus.OK).body(userModelFound);
+	}
+	
+	@PutMapping("/{userId}/roles")
+	public ResponseEntity<Object> manageUserRoles(
+			@PathVariable(value = "userId") UUID userId,
+			@RequestBody
+			@Validated
+			UserRolesDto userRolesDto) {
+		
+		log.debug("PUT manageUserRoles userId {}, userRolesDto {}", userId, userRolesDto.toString());
+		
+		Optional<UserModel> userModelOptional = this.userService.findById(userId);
+		
+		if (!userModelOptional.isPresent()) {
+			log.warn("User not found {}", userId);
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+		}
+		
+		var userModel = userModelOptional.get();
+		userModel.setRoles(userRolesDto.getRoles());
+		userModel.setLastUpdateDate(LocalDateTime.now(ZoneId.of("UTC")));
+		
+		this.userService.save(userModel);
+
+		userModel.add(linkTo(methodOn(UserController.class).getOneUser(userModel.getUserId())).withSelfRel());
+		
+		log.debug("User roles updated successfully {}", userModel.toString());
+		
+		return ResponseEntity.status(HttpStatus.OK).body(userModel);
 	}
 	
 }

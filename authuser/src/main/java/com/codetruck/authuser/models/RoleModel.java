@@ -3,6 +3,7 @@ package com.codetruck.authuser.models;
 import java.io.Serializable;
 import java.util.UUID;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -22,6 +23,7 @@ public class RoleModel implements Serializable {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private UUID roleId;
 	
+	@Column
 	private String authority;
 
 }
