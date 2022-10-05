@@ -1,9 +1,14 @@
 package com.codetruck.authuser.dtos;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import com.codetruck.authuser.models.RoleModel;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonView;
 
@@ -44,7 +49,10 @@ public class UserDto {
 	@JsonView({UserView.RegistrationPost.class, UserView.UserPut.class})
 	private String fullName;
 	
+	private Set<RoleDto> roles = new HashSet<>();
+	
 	@NotBlank
 	@JsonView(UserView.ImagePut.class)
 	private String imageUrl;
+	
 }

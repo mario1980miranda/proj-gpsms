@@ -41,7 +41,7 @@ public class AuthenticationController {
 	public ResponseEntity<Object> registerUser(
 			@RequestBody
 			@Validated(UserDto.UserView.RegistrationPost.class)
-			@JsonView(UserDto.UserView.RegistrationPost.class)
+//			@JsonView(UserDto.UserView.RegistrationPost.class)
 			UserDto userDto) {
 		
 		log.debug("POST registerUser UserDto {}", userDto.toString());
