@@ -3,6 +3,7 @@ package com.codetruck.gps.engine.services.impl;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.codetruck.gps.engine.models.ServiceResultModel;
 import com.codetruck.gps.engine.repositories.ServiceResultRepository;
@@ -17,6 +18,7 @@ public class ServiceResultServiceImpl implements ServiceResultService {
 		this.serviceResultRepository = serviceResultRepository;
 	}
 
+	@Transactional
 	@Override
 	public ServiceResultModel save(ServiceResultModel serviceResultModel) {
 		return this.serviceResultRepository.save(serviceResultModel);
