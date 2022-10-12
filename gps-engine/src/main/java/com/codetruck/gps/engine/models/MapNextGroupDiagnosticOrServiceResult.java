@@ -46,14 +46,14 @@ public class MapNextGroupDiagnosticOrServiceResult implements Serializable {
 	
 	@ManyToOne
 	@JoinColumn(name = "ID_GROUP_DIAGNOSTIC")
-	private GroupDiagnostic diagnosticCurrent;
+	private GroupDiagnosticModel diagnosticCurrent;
 	
 	@ManyToOne
 	@JoinColumn(name = "ID_GROUP_DIAGNOSTIC_NEXT")
-	private GroupDiagnostic diagnosticNext;
+	private GroupDiagnosticModel diagnosticNext;
 	
 	@ManyToOne
 	@JoinColumn(name = "ID_SERVICE_RESULT")
-	private ServiceResult serviceResult;
+	private ServiceResultModel serviceResult;
 
 }

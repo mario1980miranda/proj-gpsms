@@ -19,14 +19,14 @@ import lombok.Data;
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Entity
-@Table(name = "TB_SERVICE_RESULT")
-public class ServiceResult implements Serializable {
+@Table(name = "TB_ACTION")
+public class ActionModel implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	private UUID serviceResultId;
+	private UUID actionId;
 	
 	@Column(nullable = false)
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'")
@@ -43,12 +43,32 @@ public class ServiceResult implements Serializable {
 	private UUID userLastUpdated;
 	
 	@Column(nullable = false, length = 150)
-	private String description;
+	private String name;
 	
 	@Column(nullable = false)
-	private String code;
+	private String observation;
+	
+	@Column
+	private String nomeBean;
 	
 	@Column(nullable = false)
-	private Boolean active;
+	private Boolean automatic;
+	
+	@Column(nullable = false)
+	private Boolean ative;
+	
+	@Column(nullable = false)
+	private Boolean manualInCaseOfFail;
+	
+	@Column
+	private Integer timeout;
+	
+	@Column
+	private UUID formId;
+		
+	@Column
+	private UUID linkId;
+	
+	
 
 }

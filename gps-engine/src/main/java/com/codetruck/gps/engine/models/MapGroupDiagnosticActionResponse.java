@@ -39,7 +39,7 @@ public class MapGroupDiagnosticActionResponse implements Serializable {
 	@Id
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "ID_ACTION")
-	private Action action;
+	private ActionModel action;
 	
 	@Id
 	@Column(name = "ACTION_RESPONSE")
