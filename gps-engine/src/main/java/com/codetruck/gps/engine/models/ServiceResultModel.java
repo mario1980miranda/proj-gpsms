@@ -45,7 +45,7 @@ public class ServiceResultModel implements Serializable {
 	@Column(nullable = false, length = 150)
 	private String description;
 	
-	@Column(nullable = false)
+	@Column(nullable = false, unique = true, length = 150)
 	private String code;
 	
 	@Column(nullable = false)
