@@ -1,7 +1,7 @@
 package com.codetruck.gps.engine.enums;
 
 public enum ActionResponse {
-	NOT(0L),
+	NO(0L),
 	YES(1L),
 	WHATEVER(2L);
 	
@@ -21,8 +21,8 @@ public enum ActionResponse {
 			return YES;
 		}
 		
-		if (NOT.getOption() == option) {
-			return NOT;
+		if (NO.getOption() == option) {
+			return NO;
 		}
 		
 		return WHATEVER;
@@ -34,7 +34,7 @@ public enum ActionResponse {
 			return "Yes";
 		}
 		
-		if (NOT.equals(response)) {
+		if (NO.equals(response)) {
 			return "Not";
 		}
 		
