@@ -54,7 +54,7 @@ public class GroupDiagnosticModel implements Serializable {
 	@Column(nullable = false)
 	private UUID typeId;
 	
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "TB_RL_GDS_ACTS",
             joinColumns = @JoinColumn(name = "group_diagnostic_id"),

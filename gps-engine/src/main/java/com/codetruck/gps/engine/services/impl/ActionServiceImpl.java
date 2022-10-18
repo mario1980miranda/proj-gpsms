@@ -1,5 +1,8 @@
 package com.codetruck.gps.engine.services.impl;
 
+import java.util.Optional;
+import java.util.UUID;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -27,6 +30,11 @@ public class ActionServiceImpl implements ActionService {
 	@Override
 	public Page<ActionModel> findAll(Pageable pageable) {
 		return this.actionRepository.findAll(pageable);
+	}
+
+	@Override
+	public Optional<ActionModel> findById(UUID actionId) {
+		return this.actionRepository.findById(actionId);
 	}
 
 }
