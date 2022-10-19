@@ -21,14 +21,14 @@ import lombok.Data;
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Entity
-@Table(name = "TB_RL_GD_SR_GD")
-public class MapNextGroupDiagnosticOrServiceResult implements Serializable {
+@Table(name = "TB_FLOW_MAP_GD_RESULT")
+public class FlowMappingGroupDiagnosticModel implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	private UUID mapNextGroupOrResultId;
+	private UUID flowMappingGroupDiagnosticId;
 	
 	@Column(nullable = false)
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'")
@@ -46,14 +46,14 @@ public class MapNextGroupDiagnosticOrServiceResult implements Serializable {
 	
 	@ManyToOne
 	@JoinColumn(name = "ID_GROUP_DIAGNOSTIC")
-	private GroupDiagnosticModel diagnosticCurrent;
+	private GroupDiagnosticModel groupDiagnosticModelCurrent;
 	
 	@ManyToOne
 	@JoinColumn(name = "ID_GROUP_DIAGNOSTIC_NEXT")
-	private GroupDiagnosticModel diagnosticNext;
+	private GroupDiagnosticModel groupDiagnosticModelNext;
 	
 	@ManyToOne
 	@JoinColumn(name = "ID_SERVICE_RESULT")
-	private ServiceResultModel serviceResult;
+	private ServiceResultModel serviceResultModel;
 
 }

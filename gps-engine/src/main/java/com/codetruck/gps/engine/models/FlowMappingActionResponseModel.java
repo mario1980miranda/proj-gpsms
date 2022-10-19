@@ -15,8 +15,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import com.codetruck.gps.engine.enums.ActionResponse;
-import com.codetruck.gps.engine.models.pks.MapGroupDiagnosticActionResponsePk;
+import com.codetruck.gps.engine.enums.ActionResponseEnum;
+import com.codetruck.gps.engine.models.pks.FlowMappingActionResponsePk;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
@@ -25,26 +25,26 @@ import lombok.Data;
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Entity
-@IdClass(MapGroupDiagnosticActionResponsePk.class)
-@Table(name = "TB_RL_GD_SR_GD_ACT")
-public class MapGroupDiagnosticActionResponse implements Serializable {
+@IdClass(FlowMappingActionResponsePk.class)
+@Table(name = "TB_FLOW_MAP_GD_RESULT_ACT_RESP")
+public class FlowMappingActionResponseModel implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
 	@Id
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "ID_RL_GD_SR_GD")
-	private MapNextGroupDiagnosticOrServiceResult diagnosticOrServiceResultId;
+	private FlowMappingGroupDiagnosticModel flowMappingGroupDiagnosticId;
 	
 	@Id
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "ID_ACTION")
-	private ActionModel action;
+	private ActionModel actionId;
 	
 	@Id
 	@Column(name = "ACTION_RESPONSE")
 	@Enumerated(EnumType.ORDINAL)
-	private ActionResponse response;
+	private ActionResponseEnum actionResponse;
 	
 	@Column(nullable = false)
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'")

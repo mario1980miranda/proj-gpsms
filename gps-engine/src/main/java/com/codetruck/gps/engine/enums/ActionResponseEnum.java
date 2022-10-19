@@ -1,13 +1,13 @@
 package com.codetruck.gps.engine.enums;
 
-public enum ActionResponse {
+public enum ActionResponseEnum {
 	NO(0L),
 	YES(1L),
 	WHATEVER(2L);
 	
 	private long option;
 
-	ActionResponse(final long option) {
+	ActionResponseEnum(final long option) {
 		this.option = option;
 	}
 	
@@ -15,7 +15,7 @@ public enum ActionResponse {
 		return this.option;
 	}
 	
-	public static ActionResponse get(final long option) {
+	public static ActionResponseEnum get(final long option) {
 		
 		if (YES.getOption() == option) {
 			return YES;
@@ -28,7 +28,7 @@ public enum ActionResponse {
 		return WHATEVER;
 	}
 	
-	public static String getDescription(final ActionResponse response) {
+	public static String getDescription(final ActionResponseEnum response) {
 		
 		if (YES.equals(response)) {
 			return "Yes";

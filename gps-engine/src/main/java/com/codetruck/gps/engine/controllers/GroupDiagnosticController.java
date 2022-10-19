@@ -16,18 +16,20 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.codetruck.gps.engine.dtos.FlowServiceDto;
-import com.codetruck.gps.engine.dtos.FlowServiceSearchDto;
 import com.codetruck.gps.engine.dtos.GroupDiagnosticDto;
-import com.codetruck.gps.engine.dtos.MapNextGroupDiagnosticOrServiceResultSearchDto;
+import com.codetruck.gps.engine.dtos.flow.mapping.FlowMappingDto;
+import com.codetruck.gps.engine.dtos.flow.mapping.FlowMappingGetDto;
+import com.codetruck.gps.engine.dtos.flow.mapping.FlowMappingGroupDiagnosticDto;
+import com.codetruck.gps.engine.dtos.flow.mapping.FlowMappingGroupDiagnosticGetDto;
 import com.codetruck.gps.engine.models.ActionModel;
+import com.codetruck.gps.engine.models.FlowMappingActionResponseModel;
+import com.codetruck.gps.engine.models.FlowMappingGroupDiagnosticModel;
 import com.codetruck.gps.engine.models.GroupDiagnosticModel;
-import com.codetruck.gps.engine.models.MapNextGroupDiagnosticOrServiceResult;
-import com.codetruck.gps.engine.models.pks.MapGroupDiagnosticActionResponsePk;
 import com.codetruck.gps.engine.services.ActionService;
+import com.codetruck.gps.engine.services.FlowMappingActionResponseService;
+import com.codetruck.gps.engine.services.FlowMappingGroupDiagnosticService;
 import com.codetruck.gps.engine.services.GroupDiagnosticService;
-import com.codetruck.gps.engine.services.MapGroupDiagnosticActionResponseService;
-import com.codetruck.gps.engine.services.MapNextGroupDiagnosticOrServiceResultService;
+import com.codetruck.gps.engine.services.ServiceResultService;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -39,20 +41,22 @@ public class GroupDiagnosticController {
 
 	final GroupDiagnosticService groupDiagnosticService;
 	final ActionService actionService;
-	final MapNextGroupDiagnosticOrServiceResultService diagnosticOrServiceResultService;
-	final MapGroupDiagnosticActionResponseService actionResponseService;
+	final FlowMappingGroupDiagnosticService flowMappingGroupDiagnosticService;
+	final FlowMappingActionResponseService flowMappingActionResponseService;
+	final ServiceResultService serviceResultService;
 
 	public GroupDiagnosticController(
 			GroupDiagnosticService groupDiagnosticService, 
 			ActionService actionService, 
-			MapNextGroupDiagnosticOrServiceResultService diagnosticOrServiceResultService, 
-			MapGroupDiagnosticActionResponseService actionResponseService
+			FlowMappingGroupDiagnosticService diagnosticOrServiceResultService, 
+			FlowMappingActionResponseService actionResponseService, ServiceResultService serviceResultService
 	) {
 		
 		this.groupDiagnosticService = groupDiagnosticService;
 		this.actionService = actionService;
-		this.diagnosticOrServiceResultService = diagnosticOrServiceResultService;
-		this.actionResponseService = actionResponseService;
+		this.flowMappingGroupDiagnosticService = diagnosticOrServiceResultService;
+		this.flowMappingActionResponseService = actionResponseService;
+		this.serviceResultService = serviceResultService;
 	}
 		
 	@GetMapping("/type/{typeId}/group-diagnostic")
@@ -179,53 +183,136 @@ public class GroupDiagnosticController {
 		var groupDiagnosticModelOptional = this.groupDiagnosticService.findById(groupId);
 		
 		if (groupDiagnosticModelOptional.isEmpty()) {
-			// TODO: ERROR
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Group Diagnostic not found for id: " + groupId);
 		}
 		
-		List<MapNextGroupDiagnosticOrServiceResult> gdRsGdList = this.diagnosticOrServiceResultService.findByDiagnosticCurrent(groupDiagnosticModelOptional.get());
-		var flowResponseDto = new FlowServiceSearchDto();
+		List<FlowMappingGroupDiagnosticModel> flowMappingGroupDiagnosticModelList = this.flowMappingGroupDiagnosticService
+				.findByDiagnosticCurrent(groupDiagnosticModelOptional.get());
+		var flowMappingGetDto = new FlowMappingGetDto();
 		
-		
-		for (MapNextGroupDiagnosticOrServiceResult gdRsGdModel : gdRsGdList) {
-			var gdRsGdResponseDto = new MapNextGroupDiagnosticOrServiceResultSearchDto();
-			gdRsGdResponseDto.setId_RL_GD_RS_GD(gdRsGdModel.getMapNextGroupOrResultId());
-			gdRsGdResponseDto.setId_GD_ATUAL(gdRsGdModel.getDiagnosticCurrent().getGroupDiagnosticId());
-			gdRsGdResponseDto.setId_GD_PROX(gdRsGdModel.getDiagnosticNext() != null ? gdRsGdModel.getDiagnosticNext().getGroupDiagnosticId() : null);
-			gdRsGdResponseDto.setId_RES_ATEND(gdRsGdModel.getServiceResult() != null ? gdRsGdModel.getServiceResult().getServiceResultId() : null);
-			
-			var findById = this.actionResponseService.findById(gdRsGdModel.getMapNextGroupOrResultId());
-			
-			gdRsGdResponseDto.setActionId(findById.get().getAction().getActionId());
-			gdRsGdResponseDto.setActionResponse(findById.get().getResponse());
-			
-			flowResponseDto.getFlows().add(gdRsGdResponseDto);
+		for (FlowMappingGroupDiagnosticModel flowMappingGroupDiagnosticModel : flowMappingGroupDiagnosticModelList) {
+			var gdRsGdResponseDto = new FlowMappingGroupDiagnosticGetDto();
+			gdRsGdResponseDto
+					.setFlowMappingGroupDiagnosticId(flowMappingGroupDiagnosticModel.getFlowMappingGroupDiagnosticId());
+			gdRsGdResponseDto.setGroupDiagnosticCurrentId(
+					flowMappingGroupDiagnosticModel.getGroupDiagnosticModelCurrent().getGroupDiagnosticId());
+			gdRsGdResponseDto
+					.setGroupDiagnosticNextId(flowMappingGroupDiagnosticModel.getGroupDiagnosticModelNext() != null
+							? flowMappingGroupDiagnosticModel.getGroupDiagnosticModelNext().getGroupDiagnosticId()
+							: null);
+			gdRsGdResponseDto.setServiceResultId(flowMappingGroupDiagnosticModel.getServiceResultModel() != null
+					? flowMappingGroupDiagnosticModel.getServiceResultModel().getServiceResultId()
+					: null);
+
+			var flowMappingActionResponseModelOptional = this.flowMappingActionResponseService
+					.findFlowByMappingGroupDiagnosticId(flowMappingGroupDiagnosticModel.getFlowMappingGroupDiagnosticId());
+
+			gdRsGdResponseDto.setActionId(flowMappingActionResponseModelOptional.get().getActionId().getActionId());
+			gdRsGdResponseDto.setActionResponse(flowMappingActionResponseModelOptional.get().getActionResponse());
+
+			flowMappingGetDto.getFlows().add(gdRsGdResponseDto);
 		}
 				
-		return ResponseEntity.status(HttpStatus.OK).body(flowResponseDto);
+		return ResponseEntity.status(HttpStatus.OK).body(flowMappingGetDto);
 	}
 	
 	@PostMapping("/group-diagnostic/{groupId}/flow-mapping")
-	public ResponseEntity<Object> saveFlowMapping(
+	public ResponseEntity<Object> saveFlowMappingGroupDiagnostic(
 			@PathVariable(value = "groupId")
 			UUID groupId,
 			@RequestBody
-			FlowServiceDto flowServiceDto
+			FlowMappingDto flowMappingDto
 	) {
 		
-		try {
-			this.diagnosticOrServiceResultService.save(groupId, flowServiceDto);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		var flowMapGroupDiagnosticDtos = flowMappingDto.getFlowMappingGroupDiagnosticDtos();
+
+		var groupDiagnosticModelCurrent = this.groupDiagnosticService.findById(groupId);
+
+		if (groupDiagnosticModelCurrent.isEmpty()) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Group Diagnostic CURRENT not found for id: " + groupId);
+		}
+		
+		FlowMappingGetDto flowMappingGetResponseDto = new FlowMappingGetDto();
+
+		for (FlowMappingGroupDiagnosticDto flowMappingGroupDiagnosticDto : flowMapGroupDiagnosticDtos) {
+
+			var flowMappingGroupDiagnosticModel = new FlowMappingGroupDiagnosticModel();
+			
+			flowMappingGroupDiagnosticModel.setGroupDiagnosticModelCurrent(groupDiagnosticModelCurrent.get());
+
+			if (flowMappingGroupDiagnosticDto.getGroupdDiagnosticNextId() != null) {
+
+				var groupDiagnosticNext = this.groupDiagnosticService.findById(flowMappingGroupDiagnosticDto.getGroupdDiagnosticNextId());
+
+				if (groupDiagnosticNext.isEmpty()) {
+					return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Group Diagnostic NEXT not found for id: " + flowMappingGroupDiagnosticDto.getGroupdDiagnosticNextId());
+				}
+
+				flowMappingGroupDiagnosticModel.setGroupDiagnosticModelNext(groupDiagnosticNext.get());
+			}
+
+			if (flowMappingGroupDiagnosticDto.getServiceResultId() != null) {
+
+				var serviceResultOptional = this.serviceResultService.findById(flowMappingGroupDiagnosticDto.getServiceResultId());
+
+				if (serviceResultOptional.isEmpty()) {
+					return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Service Result not found for id: " + flowMappingGroupDiagnosticDto.getServiceResultId());
+				}
+
+				flowMappingGroupDiagnosticModel.setServiceResultModel(serviceResultOptional.get());
+			}
+
+			flowMappingGroupDiagnosticModel.setCreationDate(LocalDateTime.now(ZoneId.of("UTC")));
+			flowMappingGroupDiagnosticModel.setLastUpdatedDate(LocalDateTime.now(ZoneId.of("UTC")));
+			flowMappingGroupDiagnosticModel.setUserCreation(UUID.fromString("49ac1f76-8129-4340-8b04-71bdf3b6cb15"));
+			flowMappingGroupDiagnosticModel.setUserLastUpdated(UUID.fromString("49ac1f76-8129-4340-8b04-71bdf3b6cb15"));
+
+			var flowMappingActionResponseDto = flowMappingGroupDiagnosticDto.getFlowMappingActionResponseDto();
+			
+			var actionModelOptional = this.actionService.findById(flowMappingActionResponseDto.getActionId());
+			
+			if (actionModelOptional.isEmpty()) {
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Action not found for id: " + flowMappingActionResponseDto.getActionId());
+			}
+
+			var actionResponseModel = new FlowMappingActionResponseModel();
+
+			actionResponseModel.setFlowMappingGroupDiagnosticId(flowMappingGroupDiagnosticModel);
+
+			actionResponseModel.setActionId(actionModelOptional.get());
+			actionResponseModel.setActionResponse(flowMappingActionResponseDto.getActionResponse());
+			actionResponseModel.setCreationDate(LocalDateTime.now(ZoneId.of("UTC")));
+			actionResponseModel.setUserCreation(UUID.fromString("49ac1f76-8129-4340-8b04-71bdf3b6cb15"));
+
+			this.flowMappingGroupDiagnosticService.saveMapGroupDiagnosticAndMapActionResponse(flowMappingGroupDiagnosticModel, actionResponseModel);
+			
+			var flowMappingGroupDiagnosticGetResponseDto = new FlowMappingGroupDiagnosticGetDto();
+			flowMappingGroupDiagnosticGetResponseDto
+					.setFlowMappingGroupDiagnosticId(flowMappingGroupDiagnosticModel.getFlowMappingGroupDiagnosticId());
+			flowMappingGroupDiagnosticGetResponseDto.setGroupDiagnosticCurrentId(
+					flowMappingGroupDiagnosticModel.getGroupDiagnosticModelCurrent().getGroupDiagnosticId());
+			flowMappingGroupDiagnosticGetResponseDto
+					.setGroupDiagnosticNextId(flowMappingGroupDiagnosticModel.getGroupDiagnosticModelNext() != null
+							? flowMappingGroupDiagnosticModel.getGroupDiagnosticModelNext().getGroupDiagnosticId()
+							: null);
+			flowMappingGroupDiagnosticGetResponseDto
+					.setServiceResultId(flowMappingGroupDiagnosticModel.getServiceResultModel() != null
+							? flowMappingGroupDiagnosticModel.getServiceResultModel().getServiceResultId()
+							: null);
+
+			flowMappingGroupDiagnosticGetResponseDto.setActionId(actionResponseModel.getActionId().getActionId());
+			flowMappingGroupDiagnosticGetResponseDto.setActionResponse(actionResponseModel.getActionResponse());
+
+			flowMappingGetResponseDto.getFlows().add(flowMappingGroupDiagnosticGetResponseDto);
 		}
 						
-		return ResponseEntity.status(HttpStatus.OK).body(flowServiceDto);
+		return ResponseEntity.status(HttpStatus.CREATED).body(flowMappingGetResponseDto);
 	}
 	
 	@GetMapping("/group-diagnostic/flow-mapping/{mapId}")
 	public ResponseEntity<Object> getFlowMappingByMapId(@PathVariable(value = "mapId")UUID mapId) {
 		
-		var findById = this.actionResponseService.findById(mapId);
+		var findById = this.flowMappingActionResponseService.findFlowByMappingGroupDiagnosticId(mapId);
 		
 		return ResponseEntity.status(HttpStatus.OK).body(findById);
 	}
