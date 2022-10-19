@@ -2,9 +2,9 @@ package com.codetruck.gps.engine.controllers;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,14 +17,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.codetruck.gps.engine.dtos.FlowServiceDto;
+import com.codetruck.gps.engine.dtos.FlowServiceSearchDto;
 import com.codetruck.gps.engine.dtos.GroupDiagnosticDto;
-import com.codetruck.gps.engine.dtos.MapGroupDiagnosticActionResponseDto;
-import com.codetruck.gps.engine.dtos.MapNextGroupDiagnosticOrServiceResultDto;
-import com.codetruck.gps.engine.enums.ActionResponse;
+import com.codetruck.gps.engine.dtos.MapNextGroupDiagnosticOrServiceResultSearchDto;
 import com.codetruck.gps.engine.models.ActionModel;
 import com.codetruck.gps.engine.models.GroupDiagnosticModel;
+import com.codetruck.gps.engine.models.MapNextGroupDiagnosticOrServiceResult;
+import com.codetruck.gps.engine.models.pks.MapGroupDiagnosticActionResponsePk;
 import com.codetruck.gps.engine.services.ActionService;
 import com.codetruck.gps.engine.services.GroupDiagnosticService;
+import com.codetruck.gps.engine.services.MapGroupDiagnosticActionResponseService;
 import com.codetruck.gps.engine.services.MapNextGroupDiagnosticOrServiceResultService;
 
 import lombok.extern.log4j.Log4j2;
@@ -38,16 +40,19 @@ public class GroupDiagnosticController {
 	final GroupDiagnosticService groupDiagnosticService;
 	final ActionService actionService;
 	final MapNextGroupDiagnosticOrServiceResultService diagnosticOrServiceResultService;
+	final MapGroupDiagnosticActionResponseService actionResponseService;
 
 	public GroupDiagnosticController(
 			GroupDiagnosticService groupDiagnosticService, 
 			ActionService actionService, 
-			MapNextGroupDiagnosticOrServiceResultService diagnosticOrServiceResultService
+			MapNextGroupDiagnosticOrServiceResultService diagnosticOrServiceResultService, 
+			MapGroupDiagnosticActionResponseService actionResponseService
 	) {
 		
 		this.groupDiagnosticService = groupDiagnosticService;
 		this.actionService = actionService;
 		this.diagnosticOrServiceResultService = diagnosticOrServiceResultService;
+		this.actionResponseService = actionResponseService;
 	}
 		
 	@GetMapping("/type/{typeId}/group-diagnostic")
@@ -168,18 +173,35 @@ public class GroupDiagnosticController {
 	@GetMapping("/group-diagnostic/{groupId}/flow-mapping")
 	public ResponseEntity<Object> getFlowMapping(
 			@PathVariable(value = "groupId")
-			UUID groupId,
-			@RequestBody
-			FlowServiceDto flowServiceDto
+			UUID groupId
 	) {
 		
-		var mapsGdResGd = flowServiceDto.getFlows();
+		var groupDiagnosticModelOptional = this.groupDiagnosticService.findById(groupId);
 		
-		for (MapNextGroupDiagnosticOrServiceResultDto flow : mapsGdResGd) {
-			flow.setId_GD_ATUAL(groupId);
+		if (groupDiagnosticModelOptional.isEmpty()) {
+			// TODO: ERROR
+		}
+		
+		List<MapNextGroupDiagnosticOrServiceResult> gdRsGdList = this.diagnosticOrServiceResultService.findByDiagnosticCurrent(groupDiagnosticModelOptional.get());
+		var flowResponseDto = new FlowServiceSearchDto();
+		
+		
+		for (MapNextGroupDiagnosticOrServiceResult gdRsGdModel : gdRsGdList) {
+			var gdRsGdResponseDto = new MapNextGroupDiagnosticOrServiceResultSearchDto();
+			gdRsGdResponseDto.setId_RL_GD_RS_GD(gdRsGdModel.getMapNextGroupOrResultId());
+			gdRsGdResponseDto.setId_GD_ATUAL(gdRsGdModel.getDiagnosticCurrent().getGroupDiagnosticId());
+			gdRsGdResponseDto.setId_GD_PROX(gdRsGdModel.getDiagnosticNext() != null ? gdRsGdModel.getDiagnosticNext().getGroupDiagnosticId() : null);
+			gdRsGdResponseDto.setId_RES_ATEND(gdRsGdModel.getServiceResult() != null ? gdRsGdModel.getServiceResult().getServiceResultId() : null);
+			
+			var findById = this.actionResponseService.findById(gdRsGdModel.getMapNextGroupOrResultId());
+			
+			gdRsGdResponseDto.setActionId(findById.get().getAction().getActionId());
+			gdRsGdResponseDto.setActionResponse(findById.get().getResponse());
+			
+			flowResponseDto.getFlows().add(gdRsGdResponseDto);
 		}
 				
-		return ResponseEntity.status(HttpStatus.OK).body(flowServiceDto);
+		return ResponseEntity.status(HttpStatus.OK).body(flowResponseDto);
 	}
 	
 	@PostMapping("/group-diagnostic/{groupId}/flow-mapping")
@@ -198,6 +220,14 @@ public class GroupDiagnosticController {
 		}
 						
 		return ResponseEntity.status(HttpStatus.OK).body(flowServiceDto);
+	}
+	
+	@GetMapping("/group-diagnostic/flow-mapping/{mapId}")
+	public ResponseEntity<Object> getFlowMappingByMapId(@PathVariable(value = "mapId")UUID mapId) {
+		
+		var findById = this.actionResponseService.findById(mapId);
+		
+		return ResponseEntity.status(HttpStatus.OK).body(findById);
 	}
 	
 }

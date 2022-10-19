@@ -32,12 +32,12 @@ public class MapGroupDiagnosticActionResponse implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	@Id
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "ID_RL_GD_SR_GD")
 	private MapNextGroupDiagnosticOrServiceResult diagnosticOrServiceResultId;
 	
 	@Id
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "ID_ACTION")
 	private ActionModel action;
 	
