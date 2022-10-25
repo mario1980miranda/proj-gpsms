@@ -17,6 +17,11 @@ spring:
             lb://GPS-TYPIFICATION-SERVICE
           predicates:
             - Path=/gps-typification/**
+        - id: gps-engine-service
+          uri:
+            lb://GPS-ENGINE-SERVICE
+          predicates:
+            - Path=/gps-engine/**
             
 eureka:
   client:
